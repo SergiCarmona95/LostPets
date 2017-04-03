@@ -1,5 +1,7 @@
 package com.example.sergi.signin;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -33,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -42,10 +46,12 @@ public class NewNoticeActivity extends AppCompatActivity{
     Button cargarImagen;
     ImageView imageView;
     Button save;
+    Button elegirFecha;
     EditText nomEditText;
     EditText recompensaEditText;
     EditText colorEditText;
     EditText otherRT;
+    TextView fechaTextView;
     CheckBox otherR;
     CheckBox recompensaCheck;
     RadioButton chipSi;
@@ -53,6 +59,8 @@ public class NewNoticeActivity extends AppCompatActivity{
     RadioButton cogerSi;
     RadioButton cogerNo;
     Spinner razas;
+    int dia,mes,año;
+    static String day;
     boolean todoOk=false;
     boolean ok=false;
     public Uri imageUri;
@@ -60,6 +68,7 @@ public class NewNoticeActivity extends AppCompatActivity{
     String nombre,colorPerro,chip,coger,raza;
     int recompensa;
     final int RC_IMAGE_PICK=1;
+    static final int DATE_DIALOG_ID = 999;
     ArrayAdapter<CharSequence> adapter;
     DatabaseReference mDatabase;
     private FirebaseStorage fStorage;
@@ -78,7 +87,6 @@ public class NewNoticeActivity extends AppCompatActivity{
        cargarImagen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("a");
                 Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(intent, RC_IMAGE_PICK);
             }
@@ -104,6 +112,13 @@ public class NewNoticeActivity extends AppCompatActivity{
                 }else{
                     otherRT.setVisibility(View.INVISIBLE);
                 }
+            }
+        });
+
+        elegirFecha.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog(DATE_DIALOG_ID);
             }
         });
 
@@ -176,22 +191,21 @@ public class NewNoticeActivity extends AppCompatActivity{
 
         final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final String username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-      //  final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         String key = mDatabase.child("perro").push().getKey();
         System.out.println("a"+key);
 
         uploadImage();
-
-        Perro p =new Perro(nombre,uriImage,key,username,userId, colorPerro,coger,chip,recompensa,raza);
-       // User u = new User(userId,userEmail,username);
+        User u = new User(userId,userEmail,username);
+        Perro p =new Perro(nombre,imageUri.getLastPathSegment(),key,colorPerro,coger,chip,recompensa,raza,false,true,u,day);
         System.out.println(p.toString());
         if (todoOk==true) {
             Map<String, Object> childUpdates = new HashMap<>();
             p.setId(key);
             childUpdates.put("/perro/" + key, p);
             //childUpdates.put("/user-perro/" + u + "/" + key, p);
-            childUpdates.put("/user-perro/" + userId + "/" + key, p);
+            childUpdates.put("/user-perro/" + userId+ "/" + key, p);
             mDatabase.updateChildren(childUpdates);
             Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
 
@@ -202,44 +216,42 @@ public class NewNoticeActivity extends AppCompatActivity{
 
     public void uploadImage(){
         if (imageUri!=null){
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading.....");
-            progressDialog.show();
-            Uri file=Uri.fromFile(new File(imageUri.toString()));
-            StorageReference imageRef=mStorageRef.child(Storage_Path+System.currentTimeMillis());
-            imageRef.putFile(file)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        
-                            progressDialog.dismiss();
-                            Toast.makeText(NewNoticeActivity.this, "Image uploaded", Toast.LENGTH_SHORT).show();
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading...");
+            StorageReference imageRef= mStorageRef.child("Photos").child(imageUri.getLastPathSegment());
+            System.out.println();
 
-                        }
-                    })
+            imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    progressDialog.dismiss();
+                    Toast.makeText(NewNoticeActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
+                    
+                }
+            })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            progressDialog.dismiss();
-                            System.out.println(exception.toString());
-                            Toast.makeText(NewNoticeActivity.this, "Upload Error", Toast.LENGTH_SHORT).show();
-
+                        public void onFailure(@NonNull Exception e) {
+                            System.out.println("ERROR="+e.toString());
+                            Toast.makeText(NewNoticeActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
+                            double progress=(100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                            progressDialog.setMessage((int)  progress +"% Uploaded...");
                         }
                     });
-
+            ;
         }else{
             Toast.makeText(this, "No has puesto ninguna Foto", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void cargarVariables() {
+        fechaTextView=(TextView)findViewById(R.id.fechaTextView);
+        elegirFecha=(Button) findViewById(R.id.ponerFecha);
         mStorageRef = FirebaseStorage.getInstance().getReference();
         fStorage= FirebaseStorage.getInstance();
         recompensaCheck=(CheckBox) findViewById(R.id.recompensaCheck);
@@ -271,6 +283,37 @@ public class NewNoticeActivity extends AppCompatActivity{
             }
         }
     }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case DATE_DIALOG_ID:
+                return new DatePickerDialog(this, datePickerListener,
+                        dia,mes,año);
+        }
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener datePickerListener
+            = new DatePickerDialog.OnDateSetListener() {
+
+        public void onDateSet(DatePicker view, int selectedYear,
+                              int selectedMonth, int selectedDay) {
+             año = selectedYear;
+             mes = selectedMonth;
+             dia = selectedDay;
+            int m=mes+1;
+            day= new String(dia+"/"+m+"/"+año);
+            fechaTextView.setText(new StringBuilder()
+                    .append(dia)
+                    .append("/")
+                    .append(mes+1)
+                    .append("/")
+                    .append(año));
+        }
+
+    };
+
 
 
 }

@@ -3,13 +3,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/newNotice"
+            android:id="@+id/newDogLost"
             android:icon="@android:drawable/ic_menu_add"
-            android:title="Nuevo Aviso" />
+            android:title="Nuevo Aviso Perro Perdido" />
         <item
-            android:id="@+id/yoursSearchs"
+            android:id="@+id/newDogRescue"
             android:icon="@android:drawable/ic_menu_search"
-            android:title="Tus Avisos" />
+            android:title="Nuevo Aviso Perro Encontrado" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"

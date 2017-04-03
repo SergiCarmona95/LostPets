@@ -8,8 +8,11 @@ import com.google.firebase.database.Exclude;
 
 public class Perro {
     String nombre;
+    boolean perdido;
+    boolean encontrado;
     String raza;
     int recompensa;
+    String fecha;
     String chip;
     String coger;
     String color;
@@ -17,22 +20,59 @@ public class Perro {
     String nombreUser;
     String id;
     String imageUri;
+    User u;
+    String descripcion;
 
-    public Perro() {
-    }
 
-    public Perro(String nombre, String imageUri, String id, String nombreUser, String idUser, String color, String coger, String chip, int recompensa, String raza) {
+    public Perro(String nombre, String imageUri, String id,
+                 String color, String coger, String chip, int recompensa, String raza,
+                 boolean encontrado, boolean perdido,User u, String fecha) {
+        this.fecha= fecha;
         this.nombre = nombre;
         this.imageUri = imageUri;
         this.id = id;
-        this.nombreUser = nombreUser;
-        this.idUser = idUser;
         this.color = color;
         this.coger = coger;
         this.chip = chip;
         this.recompensa = recompensa;
         this.raza = raza;
+        this.perdido=perdido;
+        this.encontrado=encontrado;
+        this.u=u;
     }
+
+    public Perro(boolean perdido, boolean encontrado, String raza, String fecha, String color, User u, String descripcion, String imageUri, String id) {
+        this.perdido = perdido;
+        this.encontrado = encontrado;
+        this.raza = raza;
+        this.fecha = fecha;
+        this.color = color;
+        this.u = u;
+        this.descripcion = descripcion;
+        this.imageUri = imageUri;
+        this.id = id;
+    }
+
+    @Exclude
+    public String getDescripcion(){return descripcion;}
+    @Exclude
+    public void setDescripcion(String descripcion){this.descripcion=descripcion;}
+    @Exclude
+    public String getFecha(){return fecha;}
+    @Exclude
+    public void setFecha(String fecha){this.fecha=fecha;}
+    @Exclude
+    public User getUser(){return u;}
+    @Exclude
+    public void setUser(User u){this.u=u;}
+    @Exclude
+    public boolean isEncontrado() {return encontrado;}
+    @Exclude
+    public void setEncontrado(boolean encontrado) {this.encontrado = encontrado;}
+    @Exclude
+    public boolean isPerdido() {return perdido;}
+    @Exclude
+    public void setPerdido(boolean perdido) {this.perdido = perdido;}
     @Exclude
     public String getIdUser() {
         return idUser;
@@ -114,21 +154,17 @@ public class Perro {
     public void setRaza(String raza) {
         this.raza = raza;
     }
-    @Exclude
 
     @Override
     public String toString() {
         return "Perro{" +
-                "nombre='" + nombre + '\'' +
-                ", raza='" + raza + '\'' +
-                ", recompensa=" + recompensa +
-                ", chip='" + chip + '\'' +
-                ", coger='" + coger + '\'' +
-                ", color='" + color + '\'' +
-                ", idUser='" + idUser + '\'' +
-                ", nombreUser='" + nombreUser + '\'' +
-                ", id='" + id + '\'' +
+                "raza='" + raza + '\'' +
+                ", fecha='" + fecha + '\'' +
+                ", u=" + u +
+                ", descripcion='" + descripcion + '\'' +
                 ", imageUri='" + imageUri + '\'' +
+                ", id='" + id + '\'' +
+                ", color='" + color + '\'' +
                 '}';
     }
 }

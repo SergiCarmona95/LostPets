@@ -3,7 +3,7 @@
     package="com.example.sergi.signin">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -25,8 +25,9 @@
         <activity
             android:name=".SignInActivity"
             android:label="@string/title_activity_drawer"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".NewNoticeActivity"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".NewNoticeActivity" />
+        <activity android:name=".NewDogRescue"></activity>
     </application>
 
 </manifest>

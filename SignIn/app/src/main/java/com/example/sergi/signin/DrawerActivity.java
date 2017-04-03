@@ -94,11 +94,12 @@ public class DrawerActivity extends GoogleApiActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.newNotice) {
+        if (id == R.id.newDogLost) {
             Intent i = new Intent(this,NewNoticeActivity.class);
             startActivity(i);
-        } else if (id == R.id.yoursSearchs) {
-
+        } else if (id == R.id.newDogRescue) {
+            Intent i = new Intent(this,NewDogRescue.class);
+            startActivity(i);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
