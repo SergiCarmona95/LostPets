@@ -23,6 +23,7 @@ public class Perro {
     User u;
     String descripcion;
 
+    public Perro(){}
 
     public Perro(String nombre, String imageUri, String id,
                  String color, String coger, String chip, int recompensa, String raza,
@@ -158,13 +159,12 @@ public class Perro {
     @Override
     public String toString() {
         return "Perro{" +
-                "raza='" + raza + '\'' +
+                "nombre='" + nombre + '\'' +
+                ", raza='" + raza + '\'' +
+                ", recompensa=" + recompensa +
                 ", fecha='" + fecha + '\'' +
                 ", u=" + u +
                 ", descripcion='" + descripcion + '\'' +
-                ", imageUri='" + imageUri + '\'' +
-                ", id='" + id + '\'' +
-                ", color='" + color + '\'' +
                 '}';
     }
 }
