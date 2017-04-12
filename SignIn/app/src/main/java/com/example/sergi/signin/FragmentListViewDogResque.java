@@ -1,6 +1,5 @@
 package com.example.sergi.signin;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
@@ -18,19 +16,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Sergi on 04/04/2017.
+ * Created by Sergi on 05/04/2017.
  */
 
-public class FragmentListViewDogLost extends Fragment {
+public class FragmentListViewDogResque extends Fragment {
     View view;
     DatabaseReference mDatabase;
     private List<Perro> listPerro;
@@ -42,21 +36,21 @@ public class FragmentListViewDogLost extends Fragment {
         cargarPerrosFirebaseInList();
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.ListViewDowgs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-      //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
+        //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-      //  listView.setAdapter(myTodoRecyclerViewAdapter);
+        //  listView.setAdapter(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
         return view;
     }
 
     public void cargarPerrosFirebaseInList(){
-        mDatabase=FirebaseDatabase.getInstance().getReference();
+        mDatabase= FirebaseDatabase.getInstance().getReference();
         FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
                 Perro perro = dataSnapshot.getValue(Perro.class);
-                if (perro.isPerdido()==true){
+                if (perro.isEncontrado()==true){
                     listPerro.add(perro);
                     myTodoRecyclerViewAdapter.getList().add(perro);
                     //myTodoRecyclerViewAdapter.notifyDataSetChanged();
@@ -87,7 +81,6 @@ public class FragmentListViewDogLost extends Fragment {
     public void cargarDatos(){
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         mDatabase= FirebaseDatabase.getInstance().getReference();
-       // listView= (ListView)view.findViewById(R.id.ListViewDowgs);
         listPerro=new ArrayList<>();
     }
 
@@ -104,20 +97,20 @@ public class FragmentListViewDogLost extends Fragment {
         }
 
         @Override
-        public CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_dog_lost, null);
-            CustomViewHolder viewHolder = new CustomViewHolder(view);
+        public MyTodoRecyclerViewAdapter.CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_dog_resque, null);
+            MyTodoRecyclerViewAdapter.CustomViewHolder viewHolder = new MyTodoRecyclerViewAdapter.CustomViewHolder(view);
             return viewHolder;
         }
 
         @Override
-        public void onBindViewHolder(CustomViewHolder customViewHolder, int i) {
+        public void onBindViewHolder(MyTodoRecyclerViewAdapter.CustomViewHolder customViewHolder, int i) {
             Perro perroItem = listPerro.get(i);
-            customViewHolder.nombrePerro.setText(perroItem.getNombre());
+            customViewHolder.colorPerro.setText(perroItem.getColor());
             customViewHolder.razaPerro.setText(perroItem.getRaza());
            /* Uri uri= Uri.parse(perroItem.getImageUri());
             customViewHolder.fotoPerro.setImageURI(uri);*/
-            customViewHolder.recompensaPerro.setText(String.valueOf(perroItem.getRecompensa()));
+            customViewHolder.descripcionPerro.setText(String.valueOf(perroItem.getDescripcion()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());
             customViewHolder.emailPropietarioPerro.setText(String.valueOf(perroItem.getUser().getEmail()));
@@ -131,23 +124,23 @@ public class FragmentListViewDogLost extends Fragment {
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {
-            protected TextView nombrePerro;
+            protected TextView colorPerro;
             protected ImageView fotoPerro;
             protected TextView razaPerro;
-            protected TextView recompensaPerro;
+            protected TextView descripcionPerro;
             protected TextView fechaPerro;
             protected TextView nombrePropietarioPerro;
             protected TextView emailPropietarioPerro;
 
             public CustomViewHolder(View view) {
                 super(view);
-                this.nombrePerro = (TextView) view.findViewById(R.id.nombreTextViewDogLost);
-                this.fotoPerro = (ImageView) view.findViewById(R.id.fotoPerro);
-                this.razaPerro = (TextView) view.findViewById(R.id.razaTextViewDogLost);
-                this.recompensaPerro = (TextView) view.findViewById(R.id.recompensaTextViewDogLost);
-                this.fechaPerro= (TextView) view.findViewById(R.id.fechaTextViewDogLost);
-                this.nombrePropietarioPerro = (TextView) view.findViewById(R.id.nombrePropietarioTextViewDogLost);
-                this.emailPropietarioPerro= (TextView) view.findViewById(R.id.emailPropietarioTextViewDogLost);
+                this.colorPerro = (TextView) view.findViewById(R.id.colorTextViewDogResque);
+                this.fotoPerro = (ImageView) view.findViewById(R.id.fotoPerroResque);
+                this.razaPerro = (TextView) view.findViewById(R.id.razaTextViewDogResque);
+                this.descripcionPerro = (TextView) view.findViewById(R.id.descripcionTextViewDogResque);
+                this.fechaPerro= (TextView) view.findViewById(R.id.fechaTextViewDogResque);
+                this.nombrePropietarioPerro = (TextView) view.findViewById(R.id.nombrePropietarioTextViewDogResque);
+                this.emailPropietarioPerro= (TextView) view.findViewById(R.id.emailPropietarioTextViewDogResque);
             }
         }
     }

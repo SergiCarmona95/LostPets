@@ -35,7 +35,7 @@ import org.w3c.dom.Text;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NewDogRescue extends AppCompatActivity {
+public class NewDogRescueActivity extends AppCompatActivity {
     EditText colorP;
     Spinner spinner;
     Button elegirImagen;
@@ -110,7 +110,6 @@ public class NewDogRescue extends AppCompatActivity {
                 String id = mDatabase.child("perro").push().getKey();
                 User u = new User(userID,userEmail,username);
                 Perro p= new Perro(false,true,raza,fecha,color,u,descriptionText,imageUri.getLastPathSegment(),id);
-                System.out.println(p.toString());
                 Map<String, Object> childUpdates = new HashMap<>();
                 p.setId(key);
                 childUpdates.put("/perro/" + key, p);
@@ -139,13 +138,12 @@ public class NewDogRescue extends AppCompatActivity {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
             StorageReference imageRef= mStorageRef.child("Photos").child(imageUri.getLastPathSegment());
-            System.out.println();
 
             imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     progressDialog.dismiss();
-                    Toast.makeText(NewDogRescue.this, "Upload Done", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewDogRescueActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
 
                 }
             })
@@ -153,7 +151,7 @@ public class NewDogRescue extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             System.out.println("ERROR="+e.toString());
-                            Toast.makeText(NewDogRescue.this, e.toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(NewDogRescueActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -190,7 +188,6 @@ public class NewDogRescue extends AppCompatActivity {
         if (requestCode== RC_IMAGE_PICK){
             if (data!=null){
                 imageUri=data.getData();
-                System.out.println(imageUri.toString());
                 imagen.setImageURI(imageUri);
             }
         }

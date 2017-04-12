@@ -1,62 +1,62 @@
 package com.example.sergi.signin;
 
-import android.net.Uri;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by Sergi on 04/04/2017.
- */
-
-public class FragmentListViewDogLost extends Fragment {
-    View view;
+public class MyNoticeActivity extends AppCompatActivity {
+    ListView listView;
     DatabaseReference mDatabase;
     private List<Perro> listPerro;
     MyTodoRecyclerViewAdapter myTodoRecyclerViewAdapter;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view= inflater.inflate(R.layout.list_view_dogs,container,false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_my_notice);
         cargarDatos();
         cargarPerrosFirebaseInList();
-        RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.ListViewDowgs);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-      //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.listViewMyNotice);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
+        //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-      //  listView.setAdapter(myTodoRecyclerViewAdapter);
+        //  listView.setAdapter(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
-        return view;
+    }
+
+    private void cargarDatos() {
+        myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
+        mDatabase= FirebaseDatabase.getInstance().getReference();
+        listPerro=new ArrayList<>();
+        //listView=(ListView)findViewById(R.id.listViewMyNotice);
     }
 
     public void cargarPerrosFirebaseInList(){
         mDatabase=FirebaseDatabase.getInstance().getReference();
+        final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
                 Perro perro = dataSnapshot.getValue(Perro.class);
-                if (perro.isPerdido()==true){
+                if (perro.getUser().getEmail().equals(userEmail)){
+                    if (perro.isEncontrado()){perro.setNombre("Perro Perdido");}
                     listPerro.add(perro);
                     myTodoRecyclerViewAdapter.getList().add(perro);
                     //myTodoRecyclerViewAdapter.notifyDataSetChanged();
@@ -84,13 +84,6 @@ public class FragmentListViewDogLost extends Fragment {
         });
     }
 
-    public void cargarDatos(){
-        myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-       // listView= (ListView)view.findViewById(R.id.ListViewDowgs);
-        listPerro=new ArrayList<>();
-    }
-
     class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>{
 
         private List<Perro> listPerro;
@@ -104,9 +97,9 @@ public class FragmentListViewDogLost extends Fragment {
         }
 
         @Override
-        public CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public MyTodoRecyclerViewAdapter.CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_dog_lost, null);
-            CustomViewHolder viewHolder = new CustomViewHolder(view);
+            MyTodoRecyclerViewAdapter.CustomViewHolder viewHolder = new MyTodoRecyclerViewAdapter.CustomViewHolder(view);
             return viewHolder;
         }
 
@@ -122,8 +115,6 @@ public class FragmentListViewDogLost extends Fragment {
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());
             customViewHolder.emailPropietarioPerro.setText(String.valueOf(perroItem.getUser().getEmail()));
         }
-
-
 
         @Override
         public int getItemCount() {

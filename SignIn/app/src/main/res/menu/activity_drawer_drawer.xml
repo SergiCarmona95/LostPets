@@ -11,9 +11,9 @@
             android:icon="@android:drawable/ic_menu_search"
             android:title="Nuevo Aviso Perro Encontrado" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/MyNotices"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:title="Mis Avisos" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"

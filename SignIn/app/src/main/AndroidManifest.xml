@@ -27,7 +27,8 @@
             android:label="@string/title_activity_drawer"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".NewNoticeActivity" />
-        <activity android:name=".NewDogRescue"></activity>
+        <activity android:name=".NewDogRescue" />
+        <activity android:name=".MyNoticeActivity"></activity>
     </application>
 
 </manifest>
