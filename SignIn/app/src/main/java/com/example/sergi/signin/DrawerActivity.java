@@ -73,12 +73,7 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         System.out.println("size="+classPerro.getList().size());
-        /*try {
-            System.out.println("size="+classPerro.getList().size());
-            descargarImagenesFirebase();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -145,73 +140,6 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         return super.onOptionsItemSelected(item);
     }
 
-    public void descargarImagenesFirebase() throws IOException {
-        final File dir = new File(getBaseContext().getFilesDir().getAbsolutePath()+"imagenes");
-        if (!dir.exists()) {
-            Toast.makeText(this, "CREADO LA CARPETA", Toast.LENGTH_SHORT).show();
-            dir.mkdirs();
-        }
-        System.out.println("a");
-        System.out.println("size="+classPerro.getList().size());
-        /*for (Perro p:listPerro) {
-            String nomIma=p.getImageUri();
-            mStorageRef.child("images/"+nomIma);
-            final long ONE_MEGABYTE = 1024 * 1024;
-            File localFile = File.createTempFile("images", "jpg");
-
-            mStorageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    // Local temp file has been created
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                }
-            });
-        }*///universalimageloader
-        System.out.println("size="+classPerro.getList().size());
-        for (Perro p:listPerro) {
-            //System.out.println(p.toString());
-            /*if (p.getNombre().equals("firulais")){
-                System.out.println("imagen="+p.getImageUri());
-               /* System.out.println("1");
-                final String nomIma=p.getImageUri();
-                StorageReference pathReference =mStorageRef.child("Photos/"+nomIma);
-                final long ONE_MEGABYTE = 1024 * 1024;
-                pathReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        System.out.println("2");
-                        try {
-                           FileOutputStream foto =new FileOutputStream(dir+nomIma);
-                            DataOutputStream dataOut = new DataOutputStream(foto);
-                            while (true){
-                                dataOut.write(bytes);
-                            }
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (EOFException e){
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        Toast.makeText(DrawerActivity.this, "Imagen Descargada", Toast.LENGTH_SHORT).show();
-                    }
-
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                    }
-                });*/
-            //}
-        }
-    }
-    public void guardarPerros(Perro perro){
-        listPerro.add(perro);
-    }
 
     public void cargarPerrosFirebaseInList(){
         mDatabase= FirebaseDatabase.getInstance().getReference();
@@ -219,9 +147,11 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
                 Perro perro = dataSnapshot.getValue(Perro.class);
-                //listPerro.add(perro);
-                guardarPerros(perro);
-
+                try {
+                    descargarImagen(perro);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -241,6 +171,32 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
             }
         });
     }
+    ///universalimageloader
+    public void descargarImagen(Perro p) throws IOException {
+        final String nombreImagen=p.getImageUri();
+        final File dir = new File(getBaseContext().getFilesDir().getAbsolutePath()+"imagenes");
+        if (!dir.exists()) {
+            Toast.makeText(this, "CREADO LA CARPETA", Toast.LENGTH_SHORT).show();
+            dir.mkdirs();
+        }
+        String nomIma=p.getImageUri();
+        StorageReference imagRef=mStorageRef.child("Photos/"+nomIma);
+        final long ONE_MEGABYTE = 1024 * 1024;
+        System.out.println("Imagen="+nombreImagen);
+        imagRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Toast.makeText(DrawerActivity.this, "Imagen "+nombreImagen+" Descargada", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                
+            }
+        });
+
+    }
+
 
     public void cargarDatos(){
         classPerro= new ListPerroClass();

@@ -28,7 +28,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".NewNoticeActivity" />
         <activity android:name=".NewDogRescue" />
-        <activity android:name=".MyNoticeActivity"></activity>
+        <activity android:name=".MyNoticeActivity" />
+        <activity android:name=".MyNoticeActivityDelete"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,5 @@
 package com.example.sergi.signin;
 
-import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MyNoticeActivity extends AppCompatActivity {
+public class MyNoticeActivityDelete extends AppCompatActivity {
     DatabaseReference mDatabase;
     private List<Perro> listPerro;
-    FloatingActionButton floatingActionButton;
     MyTodoRecyclerViewAdapter myTodoRecyclerViewAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +34,7 @@ public class MyNoticeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_notice);
         cargarDatos();
         cargarPerrosFirebaseInList();
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getBaseContext(),MyNoticeActivityDelete.class);
-                startActivity(i);
-            }
-        });
+
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.listViewMyNotice);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
@@ -50,14 +42,17 @@ public class MyNoticeActivity extends AppCompatActivity {
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         //  listView.setAdapter(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
+
+        ItemTouchHelper.Callback callback =
+                new SimpleItemTouchHelperCallback(myTodoRecyclerViewAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(mRecyclerView);
     }
 
     private void cargarDatos() {
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         mDatabase= FirebaseDatabase.getInstance().getReference();
         listPerro=new ArrayList<>();
-        floatingActionButton = (FloatingActionButton)findViewById(R.id.botonBorrar);
-        //listView=(ListView)findViewById(R.id.listViewMyNotice);
     }
 
     public void cargarPerrosFirebaseInList(){
@@ -97,7 +92,8 @@ public class MyNoticeActivity extends AppCompatActivity {
         });
     }
 
-    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>{
+    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>
+            implements ItemTouchHelperAdapter{
 
         private List<Perro> listPerro;
 
@@ -134,6 +130,23 @@ public class MyNoticeActivity extends AppCompatActivity {
             return (null != listPerro ? listPerro.size() : 0);
         }
 
+        @Override
+        public boolean onItemMove(int fromPosition, int toPosition) {
+            Collections.swap(listPerro, fromPosition, toPosition);
+            notifyItemMoved(fromPosition, toPosition);
+            return true;
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+            mDatabase=FirebaseDatabase.getInstance().getReference();
+            Perro p=listPerro.get(position);
+            String key= p.getId();
+            System.out.println(key);
+            mDatabase.child("perro").child(key).removeValue();
+            listPerro.remove(position);
+            notifyItemRemoved(position);
+        }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {
             protected TextView nombrePerro;
@@ -155,5 +168,50 @@ public class MyNoticeActivity extends AppCompatActivity {
                 this.emailPropietarioPerro= (TextView) view.findViewById(R.id.emailPropietarioTextViewDogLost);
             }
         }
+    }
+}
+
+interface ItemTouchHelperAdapter {
+
+    boolean onItemMove(int fromPosition, int toPosition);
+
+    void onItemDismiss(int position);
+}
+
+class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
+
+    private final ItemTouchHelperAdapter mAdapter;
+
+    public SimpleItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
+        mAdapter = adapter;
+    }
+
+    @Override
+    public boolean isLongPressDragEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return true;
+    }
+
+    @Override
+    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+        int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+        return makeMovementFlags(dragFlags, swipeFlags);
+    }
+
+    @Override
+    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                          RecyclerView.ViewHolder target) {
+        mAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        return true;
+    }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+        mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
 }
