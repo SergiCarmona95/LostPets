@@ -1,6 +1,9 @@
 package com.example.sergi.signin;
 
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.util.SparseArray;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +15,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -22,9 +28,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static android.R.attr.bitmap;
 
 /**
  * Created by Sergi on 04/04/2017.
@@ -43,7 +52,6 @@ public class FragmentListViewDogLost extends Fragment {
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.ListViewDowgs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
       //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
-        myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
       //  listView.setAdapter(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
         return view;
@@ -115,8 +123,26 @@ public class FragmentListViewDogLost extends Fragment {
             Perro perroItem = listPerro.get(i);
             customViewHolder.nombrePerro.setText(perroItem.getNombre());
             customViewHolder.razaPerro.setText(perroItem.getRaza());
-           /* Uri uri= Uri.parse(perroItem.getImageUri());
-            customViewHolder.fotoPerro.setImageURI(uri);*/
+
+            String ni = perroItem.getImageUri();
+            File f = new File(view.getContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
+            System.out.println(perroItem.getNombre()+" Imagen:"+ f.toString());
+           // Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+           /* Bitmap originalImage = BitmapFactory.decodeFile(f.getAbsolutePath());
+            int width=originalImage.getWidth();
+            int height = originalImage.getHeight();
+            Matrix matrix = new Matrix();
+            int newWidth = 200;
+            int newHeight = 200;
+            float scaleWidth = ((float) newWidth) / width;
+            float scaleHeight = ((float) newHeight) / height;
+            matrix.postScale(scaleWidth, scaleHeight);
+            Bitmap myBitmap =Bitmap.createBitmap(originalImage, 0, 0, width, height, matrix, true);*/
+
+            Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+            customViewHolder.fotoPerro.setImageBitmap(myBitmap);
+            //customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
+            //customViewHolder.fotoPerro.setImageBitmap(Bitmap.createScaledBitmap(myBitmap, 120, 120, false));
             customViewHolder.recompensaPerro.setText(String.valueOf(perroItem.getRecompensa()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());

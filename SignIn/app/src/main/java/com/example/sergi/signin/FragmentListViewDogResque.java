@@ -1,5 +1,8 @@
 package com.example.sergi.signin;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,8 +112,10 @@ public class FragmentListViewDogResque extends Fragment {
             Perro perroItem = listPerro.get(i);
             customViewHolder.colorPerro.setText(perroItem.getColor());
             customViewHolder.razaPerro.setText(perroItem.getRaza());
-           /* Uri uri= Uri.parse(perroItem.getImageUri());
-            customViewHolder.fotoPerro.setImageURI(uri);*/
+            String ni = perroItem.getImageUri();
+            File f = new File(view.getContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
+           // Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+            customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
             customViewHolder.descripcionPerro.setText(String.valueOf(perroItem.getDescripcion()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());

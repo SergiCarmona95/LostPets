@@ -1,6 +1,9 @@
 package com.example.sergi.signin;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,8 +125,11 @@ public class MyNoticeActivity extends AppCompatActivity {
             Perro perroItem = listPerro.get(i);
             customViewHolder.nombrePerro.setText(perroItem.getNombre());
             customViewHolder.razaPerro.setText(perroItem.getRaza());
-           /* Uri uri= Uri.parse(perroItem.getImageUri());
-            customViewHolder.fotoPerro.setImageURI(uri);*/
+            String ni = perroItem.getImageUri();
+            File f = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
+            System.out.println(perroItem.getNombre()+" Imagen:"+ f.toString());
+            //Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+            customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
             customViewHolder.recompensaPerro.setText(String.valueOf(perroItem.getRecompensa()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());

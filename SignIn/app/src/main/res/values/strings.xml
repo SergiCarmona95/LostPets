@@ -247,4 +247,5 @@
         <item>Xoloitzcuintle</item>
         <item>Yorkshire terrier</item>
     </string-array>
+    <string name="title_activity_maps">Map</string>
 </resources>

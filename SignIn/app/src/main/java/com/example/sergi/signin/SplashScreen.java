@@ -27,6 +27,7 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
+
        // gifGalgo = (GifImageView) findViewById(R.id.gifGalgo);
         progressBar = (ProgressBar) findViewById(R.id.progresBar);
         progressBar.setVisibility(progressBar.VISIBLE);;

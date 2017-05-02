@@ -53,7 +53,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DrawerActivity extends GoogleApiActivity implements NavigationView.OnNavigationItemSelectedListener {
     private ViewPager mViewPager;
@@ -64,6 +68,9 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
     StorageReference pathReference;
     private StorageReference mStorageRef;
     private List<Perro> listPerro;
+    private HashMap<String, byte[]> fotos;
+    File dirImagenes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -73,7 +80,7 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         System.out.println("size="+classPerro.getList().size());
-
+       fotos = new HashMap<String, byte[]>();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -173,32 +180,37 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
     }
     ///universalimageloader
     public void descargarImagen(Perro p) throws IOException {
-        final String nombreImagen=p.getImageUri();
-        final File dir = new File(getBaseContext().getFilesDir().getAbsolutePath()+"imagenes");
-        if (!dir.exists()) {
-            Toast.makeText(this, "CREADO LA CARPETA", Toast.LENGTH_SHORT).show();
-            dir.mkdirs();
+        //final String nombreImagen=p.getImageUri();
+       // final File dir = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes");
+        if (!dirImagenes.exists()) {
+            //Toast.makeText(this, "CREADO LA CARPETA", Toast.LENGTH_SHORT).show();
+            dirImagenes.mkdirs();
         }
         String nomIma=p.getImageUri();
+      //  Toast.makeText(this, nomIma, Toast.LENGTH_SHORT).show();
         StorageReference imagRef=mStorageRef.child("Photos/"+nomIma);
         final long ONE_MEGABYTE = 1024 * 1024;
-        System.out.println("Imagen="+nombreImagen);
-        imagRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                Toast.makeText(DrawerActivity.this, "Imagen "+nombreImagen+" Descargada", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                
-            }
-        });
 
+        final File localFile = new  File(dirImagenes.getAbsolutePath() + "/" + nomIma + ".jpg");
+        System.out.println(localFile.toString());
+        if (!localFile.exists()){
+            imagRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                  //  Toast.makeText(DrawerActivity.this, "Descargada imagen "+localFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+
+                }
+            });
+        }
     }
 
 
     public void cargarDatos(){
+        dirImagenes= new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes");
         classPerro= new ListPerroClass();
         mDatabase= FirebaseDatabase.getInstance().getReference();
         listPerro=new ArrayList<>();
