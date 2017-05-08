@@ -123,8 +123,7 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
             customViewHolder.razaPerro.setText(perroItem.getRaza());
             String ni = perroItem.getImageUri();
             File f = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
-            System.out.println(perroItem.getNombre()+" Imagen:"+ f.toString());
-            customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
+            customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));
             customViewHolder.recompensaPerro.setText(String.valueOf(perroItem.getRecompensa()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());

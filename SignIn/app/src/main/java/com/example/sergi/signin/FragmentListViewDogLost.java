@@ -41,65 +41,27 @@ import static android.R.attr.bitmap;
 
 public class FragmentListViewDogLost extends Fragment {
     View view;
-    DatabaseReference mDatabase;
-    private List<Perro> listPerro;
     MyTodoRecyclerViewAdapter myTodoRecyclerViewAdapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view= inflater.inflate(R.layout.list_view_dogs,container,false);
-        cargarDatos();
-        cargarPerrosFirebaseInList();
+        cargarVariables();
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.ListViewDowgs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-      //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
-      //  listView.setAdapter(myTodoRecyclerViewAdapter);
+        myTodoRecyclerViewAdapter = new FragmentListViewDogLost.MyTodoRecyclerViewAdapter();
+        myTodoRecyclerViewAdapter.setList(Datos.listperrosPerdidos);
+        Datos.setPerdidosChangeListener(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
         return view;
     }
 
-    public void cargarPerrosFirebaseInList(){
-        mDatabase=FirebaseDatabase.getInstance().getReference();
-        FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
-                Perro perro = dataSnapshot.getValue(Perro.class);
-                if (perro.isPerdido()==true){
-                    listPerro.add(perro);
-                    myTodoRecyclerViewAdapter.getList().add(perro);
-                    //myTodoRecyclerViewAdapter.notifyDataSetChanged();
-                    myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
-                }else{
 
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    public void cargarDatos(){
+    public void cargarVariables(){
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-       // listView= (ListView)view.findViewById(R.id.ListViewDowgs);
-        listPerro=new ArrayList<>();
     }
 
-    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>{
+    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder> implements Datos.PerdidosChangeListener{
 
         private List<Perro> listPerro;
 
@@ -109,6 +71,10 @@ public class FragmentListViewDogLost extends Fragment {
 
         public List<Perro> getList(){
             return listPerro;
+        }
+
+        public void setList(List<Perro> listPerro) {
+            this.listPerro = listPerro;
         }
 
         @Override
@@ -126,23 +92,9 @@ public class FragmentListViewDogLost extends Fragment {
 
             String ni = perroItem.getImageUri();
             File f = new File(view.getContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
-            System.out.println(perroItem.getNombre()+" Imagen:"+ f.toString());
-           // Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
-           /* Bitmap originalImage = BitmapFactory.decodeFile(f.getAbsolutePath());
-            int width=originalImage.getWidth();
-            int height = originalImage.getHeight();
-            Matrix matrix = new Matrix();
-            int newWidth = 200;
-            int newHeight = 200;
-            float scaleWidth = ((float) newWidth) / width;
-            float scaleHeight = ((float) newHeight) / height;
-            matrix.postScale(scaleWidth, scaleHeight);
-            Bitmap myBitmap =Bitmap.createBitmap(originalImage, 0, 0, width, height, matrix, true);*/
-
-            Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
-            customViewHolder.fotoPerro.setImageBitmap(myBitmap);
-            //customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
-            //customViewHolder.fotoPerro.setImageBitmap(Bitmap.createScaledBitmap(myBitmap, 120, 120, false));
+            if (f.exists()){
+                customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));
+            }
             customViewHolder.recompensaPerro.setText(String.valueOf(perroItem.getRecompensa()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());
@@ -154,6 +106,11 @@ public class FragmentListViewDogLost extends Fragment {
         @Override
         public int getItemCount() {
             return (null != listPerro ? listPerro.size() : 0);
+        }
+
+        @Override
+        public void notifyPerdidosChange() {
+            notifyDataSetChanged();
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {

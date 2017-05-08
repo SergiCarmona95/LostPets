@@ -30,74 +30,39 @@ import java.util.List;
 
 public class FragmentListViewDogResque extends Fragment {
     View view;
-    DatabaseReference mDatabase;
-    private List<Perro> listPerro;
     MyTodoRecyclerViewAdapter myTodoRecyclerViewAdapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view= inflater.inflate(R.layout.list_view_dogs,container,false);
-        cargarDatos();
-        cargarPerrosFirebaseInList();
+        cargarVariables();
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.ListViewDowgs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-        //  listView.setAdapter(myTodoRecyclerViewAdapter);
+        myTodoRecyclerViewAdapter.setList(Datos.listperrosEncontrados);
+        Datos.setEncontradosChangeListener(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
         return view;
     }
 
-    public void cargarPerrosFirebaseInList(){
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-        FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-
-                Perro perro = dataSnapshot.getValue(Perro.class);
-                if (perro.isEncontrado()==true){
-                    listPerro.add(perro);
-                    myTodoRecyclerViewAdapter.getList().add(perro);
-                    //myTodoRecyclerViewAdapter.notifyDataSetChanged();
-                    myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
-                }else{
-
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    public void cargarDatos(){
+    public void cargarVariables(){
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-        listPerro=new ArrayList<>();
     }
 
-    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>{
+    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder> implements Datos.EncontradosChangeListener{
 
         private List<Perro> listPerro;
 
         public MyTodoRecyclerViewAdapter() {
+
             this.listPerro = new ArrayList<>();
         }
 
         public List<Perro> getList(){
             return listPerro;
+        }
+
+        public void setList(List<Perro> listPerro){
+            this.listPerro=listPerro;
         }
 
         @Override
@@ -114,8 +79,9 @@ public class FragmentListViewDogResque extends Fragment {
             customViewHolder.razaPerro.setText(perroItem.getRaza());
             String ni = perroItem.getImageUri();
             File f = new File(view.getContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
-           // Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
-            customViewHolder.fotoPerro.setImageURI(Uri.fromFile(f));
+            if (f.exists()){
+                customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));
+            }
             customViewHolder.descripcionPerro.setText(String.valueOf(perroItem.getDescripcion()));
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
             customViewHolder.nombrePropietarioPerro.setText(perroItem.getUser().getUsername());
@@ -127,6 +93,11 @@ public class FragmentListViewDogResque extends Fragment {
         @Override
         public int getItemCount() {
             return (null != listPerro ? listPerro.size() : 0);
+        }
+
+        @Override
+        public void notifyEncontradosChange() {
+            notifyDataSetChanged();
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {

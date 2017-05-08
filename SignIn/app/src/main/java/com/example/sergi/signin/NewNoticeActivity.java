@@ -204,7 +204,7 @@ public class NewNoticeActivity extends AppCompatActivity{
             Map<String, Object> childUpdates = new HashMap<>();
             p.setId(key);
             childUpdates.put("/perro/" + key, p);
-            //childUpdates.put("/user-perro/" + u + "/" + key, p);
+            childUpdates.put("/user-perro/" + u + "/" + key, p);
             childUpdates.put("/user-perro/" + userId+ "/" + key, p);
             mDatabase.updateChildren(childUpdates);
             Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
@@ -218,8 +218,8 @@ public class NewNoticeActivity extends AppCompatActivity{
         if (imageUri!=null){
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
+            progressDialog.show();
             StorageReference imageRef= mStorageRef.child("Photos").child(imageUri.getLastPathSegment());
-            System.out.println();
 
             imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -232,7 +232,6 @@ public class NewNoticeActivity extends AppCompatActivity{
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            System.out.println("ERROR="+e.toString());
                             Toast.makeText(NewNoticeActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         }
                     })

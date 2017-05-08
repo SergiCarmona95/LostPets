@@ -113,7 +113,7 @@ public class NewDogRescueActivity extends AppCompatActivity {
                 Map<String, Object> childUpdates = new HashMap<>();
                 p.setId(key);
                 childUpdates.put("/perro/" + key, p);
-                //childUpdates.put("/user-perro/" + u + "/" + key, p);
+                childUpdates.put("/user-perro/" + u + "/" + key, p);
                 childUpdates.put("/user-perro/" + userID+ "/" + key, p);
                 mDatabase.updateChildren(childUpdates);
                 Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
@@ -137,20 +137,20 @@ public class NewDogRescueActivity extends AppCompatActivity {
         if (imageUri!=null){
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
+            progressDialog.show();
             StorageReference imageRef= mStorageRef.child("Photos").child(imageUri.getLastPathSegment());
+            imageRef.putFile(imageUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            progressDialog.dismiss();
+                            Toast.makeText(NewDogRescueActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
 
-            imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    progressDialog.dismiss();
-                    Toast.makeText(NewDogRescueActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
-
-                }
-            })
+                        }
+                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            System.out.println("ERROR="+e.toString());
                             Toast.makeText(NewDogRescueActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         }
                     })
@@ -158,7 +158,7 @@ public class NewDogRescueActivity extends AppCompatActivity {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress=(100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
-                            progressDialog.setMessage((int)  progress +"% Uploaded...");
+                            progressDialog.setMessage(((int)  progress) +"% Uploaded...");
                         }
                     });
             ;

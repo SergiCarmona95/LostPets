@@ -1,13 +1,8 @@
 package com.example.sergi.signin;
 
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -15,72 +10,41 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class DrawerActivity extends GoogleApiActivity implements NavigationView.OnNavigationItemSelectedListener {
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private static int numTab;
-    DatabaseReference mDatabase;
-    ListPerroClass classPerro;
-    StorageReference pathReference;
-    private StorageReference mStorageRef;
-    private List<Perro> listPerro;
-    private HashMap<String, byte[]> fotos;
-    File dirImagenes;
+    public static Datos datos;
+    boolean cargarDatos=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
-        cargarDatos();
-        cargarPerrosFirebaseInList();
+        cargarVariables();
+        datos.crearCarpeta();
+        datos.cargarPerrosEncontrados();
+        datos.cargarPerrosPerdidos();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        System.out.println("size="+classPerro.getList().size());
-       fotos = new HashMap<String, byte[]>();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -148,73 +112,8 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
     }
 
 
-    public void cargarPerrosFirebaseInList(){
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-        FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Perro perro = dataSnapshot.getValue(Perro.class);
-                try {
-                    descargarImagen(perro);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-    ///universalimageloader
-    public void descargarImagen(Perro p) throws IOException {
-        //final String nombreImagen=p.getImageUri();
-       // final File dir = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes");
-        if (!dirImagenes.exists()) {
-            //Toast.makeText(this, "CREADO LA CARPETA", Toast.LENGTH_SHORT).show();
-            dirImagenes.mkdirs();
-        }
-        String nomIma=p.getImageUri();
-      //  Toast.makeText(this, nomIma, Toast.LENGTH_SHORT).show();
-        StorageReference imagRef=mStorageRef.child("Photos/"+nomIma);
-        final long ONE_MEGABYTE = 1024 * 1024;
-
-        final File localFile = new  File(dirImagenes.getAbsolutePath() + "/" + nomIma + ".jpg");
-        System.out.println(localFile.toString());
-        if (!localFile.exists()){
-            imagRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                  //  Toast.makeText(DrawerActivity.this, "Descargada imagen "+localFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-
-                }
-            });
-        }
-    }
-
-
-    public void cargarDatos(){
-        dirImagenes= new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes");
-        classPerro= new ListPerroClass();
-        mDatabase= FirebaseDatabase.getInstance().getReference();
-        listPerro=new ArrayList<>();
-        mStorageRef = FirebaseStorage.getInstance().getReferenceFromUrl("gs://signin-2913c.appspot.com");
+    public void cargarVariables(){
+        datos= new Datos(getBaseContext());
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -297,15 +196,4 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         }
     }
 
-    class ListPerroClass{
-        private List<Perro> listPerro;
-
-        public ListPerroClass() {
-            this.listPerro = new ArrayList<>();
-        }
-
-        public List<Perro> getList(){
-            return listPerro;
-        }
-    }
 }
