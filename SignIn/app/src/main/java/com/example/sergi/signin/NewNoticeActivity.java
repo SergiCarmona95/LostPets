@@ -43,10 +43,14 @@ import java.util.UUID;
 
 
 public class NewNoticeActivity extends AppCompatActivity{
+    Coordenadas objeto;
+    TextView ubicacionTextView;
+    String activity;
     Button cargarImagen;
     ImageView imageView;
     Button save;
     Button elegirFecha;
+    Button cojerUbicacion;
     EditText nomEditText;
     EditText recompensaEditText;
     EditText colorEditText;
@@ -62,7 +66,7 @@ public class NewNoticeActivity extends AppCompatActivity{
     int dia,mes,año;
     static String day;
     boolean todoOk=false;
-    boolean ok=false;
+    boolean ubicacionOk=false;
     public Uri imageUri;
     public String uriImage;
     String nombre,colorPerro,chip,coger,raza;
@@ -74,6 +78,8 @@ public class NewNoticeActivity extends AppCompatActivity{
     private FirebaseStorage fStorage;
     private StorageReference mStorageRef;
     public static final String Storage_Path="image/";
+    private double lat;
+    private double lon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +87,10 @@ public class NewNoticeActivity extends AppCompatActivity{
         setContentView(R.layout.activity_new_notice);
         cargarVariables();
 
+        cargarUbicacion();
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         razas.setAdapter(adapter);
+
 
        cargarImagen.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +120,14 @@ public class NewNoticeActivity extends AppCompatActivity{
                 }else{
                     otherRT.setVisibility(View.INVISIBLE);
                 }
+            }
+        });
+
+        cojerUbicacion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(),MapsActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -172,6 +188,23 @@ public class NewNoticeActivity extends AppCompatActivity{
 
     }
 
+    private void cargarUbicacion() {
+        if (objeto.getActivity().equals("maps")){
+            lat=objeto.getLatitud();
+            lon=objeto.getLongitud();
+            System.out.println("activity new Latitud:"+lat);
+            System.out.println("ativity new Longitud:"+lon);
+        }
+
+        if (lat==0&& lon==0){
+            ubicacionTextView.setText("No has puesto ubicacion");
+        }else{
+            ubicacionTextView.setText("Ubicación correcta");
+            ubicacionOk=true;
+        }
+
+    }
+
 
     public void comprobarDatos(){
         if (nombre.equals("")){
@@ -182,6 +215,8 @@ public class NewNoticeActivity extends AppCompatActivity{
             Toast.makeText(this, "No has elegido si es amistoso o no", Toast.LENGTH_SHORT).show();
         }else if(!chipSi.isChecked() && !chipNo.isChecked()){
             Toast.makeText(this, "No has elegido si tiene chip o no", Toast.LENGTH_SHORT).show();
+        }else if(!ubicacionOk){
+            Toast.makeText(this, "No has añadido ubicacion", Toast.LENGTH_SHORT).show();
         }else{
             todoOk=true;
         }
@@ -198,13 +233,13 @@ public class NewNoticeActivity extends AppCompatActivity{
 
         uploadImage();
         User u = new User(userId,userEmail,username);
-        Perro p =new Perro(nombre,imageUri.getLastPathSegment(),key,colorPerro,coger,chip,recompensa,raza,false,true,u,day);
-        System.out.println(p.toString());
+        Perro p =new Perro(nombre,imageUri.getLastPathSegment(),key,colorPerro,coger,chip,recompensa,raza,false,true,u,day,lat,lon);
+        System.out.println("perro:"+p.toString());
         if (todoOk==true) {
+            System.out.println("perro:correcto");
             Map<String, Object> childUpdates = new HashMap<>();
             p.setId(key);
             childUpdates.put("/perro/" + key, p);
-            childUpdates.put("/user-perro/" + u + "/" + key, p);
             childUpdates.put("/user-perro/" + userId+ "/" + key, p);
             mDatabase.updateChildren(childUpdates);
             Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
@@ -249,6 +284,9 @@ public class NewNoticeActivity extends AppCompatActivity{
     }
 
     private void cargarVariables() {
+        ubicacionTextView=(TextView)findViewById(R.id.ubicacionTextView);
+        objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
+        cojerUbicacion=(Button) findViewById(R.id.maps_button_new_dog);
         fechaTextView=(TextView)findViewById(R.id.fechaTextView);
         elegirFecha=(Button) findViewById(R.id.ponerFecha);
         mStorageRef = FirebaseStorage.getInstance().getReference();

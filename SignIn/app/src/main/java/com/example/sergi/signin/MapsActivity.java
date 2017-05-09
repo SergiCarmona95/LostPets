@@ -7,12 +7,16 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.view.View;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,6 +30,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
     AlertDialog alert = null;
     Location location;
+    FloatingActionButton floatingActionButton;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -35,6 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        floatingActionButton = (FloatingActionButton)findViewById(R.id.botonVolver);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -73,6 +79,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
+                Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                i.putExtra("activity",coordenadas);
+                System.out.println("activity latitud="+mMap.getMyLocation().getLatitude());
+                System.out.println("activity longitud="+mMap.getMyLocation().getLongitude());
+                startActivity(i);
+            }
+        });
 
         // Add a marker in Sydney and move the camera
        // LatLng espanya = new LatLng(40.4167754, -3.7037901999999576);

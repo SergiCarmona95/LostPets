@@ -124,9 +124,13 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
 
         if (id == R.id.newDogLost) {
             Intent i = new Intent(this,NewNoticeActivity.class);
+            Coordenadas coordenadas= new Coordenadas("drawer",0.0,0.0);
+            i.putExtra("activity",coordenadas);
             startActivity(i);
         } else if (id == R.id.newDogRescue) {
             Intent i = new Intent(this,NewDogRescueActivity.class);
+            Coordenadas coordenadas= new Coordenadas("drawer",0.0,0.0);
+            i.putExtra("activity",coordenadas);
             startActivity(i);
         } else if (id == R.id.MyNotices) {
             Intent i = new Intent(this,MyNoticeActivity.class);

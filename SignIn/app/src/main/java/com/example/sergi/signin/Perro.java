@@ -22,6 +22,8 @@ public class Perro {
     String imageUri;
     User u;
     String descripcion;
+    double lat;
+    double lon;
 
     public Perro(){}
 
@@ -54,6 +56,48 @@ public class Perro {
         this.id = id;
     }
 
+    public Perro(boolean perdido, boolean encontrado, String raza, String fecha,
+                 String color, User u, String descripcion, String imageUri, String id,double lat,double lon) {
+        this.perdido = perdido;
+        this.encontrado = encontrado;
+        this.raza = raza;
+        this.fecha = fecha;
+        this.color = color;
+        this.u = u;
+        this.descripcion = descripcion;
+        this.imageUri = imageUri;
+        this.id = id;
+        this.lon=lon;
+        this.lat=lat;
+    }
+
+    public Perro(String nombre, String imageUri, String id,
+                 String color, String coger, String chip, int recompensa, String raza,
+                 boolean encontrado, boolean perdido,User u, String fecha,double lat,double lon) {
+        this.fecha= fecha;
+        this.nombre = nombre;
+        this.imageUri = imageUri;
+        this.id = id;
+        this.color = color;
+        this.coger = coger;
+        this.chip = chip;
+        this.recompensa = recompensa;
+        this.raza = raza;
+        this.perdido=perdido;
+        this.encontrado=encontrado;
+        this.u=u;
+        this.lon=lon;
+        this.lat=lat;
+    }
+
+    @Exclude
+    public double getLat() {return lat;}
+    @Exclude
+    public void setLat(double lat) {this.lat = lat;}
+    @Exclude
+    public double getLon() {return lon;}
+    @Exclude
+    public void setLon(double lon) {this.lon = lon;}
     @Exclude
     public String getDescripcion(){return descripcion;}
     @Exclude

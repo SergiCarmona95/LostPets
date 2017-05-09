@@ -36,6 +36,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NewDogRescueActivity extends AppCompatActivity {
+    double lat;
+    double lon;
+    boolean ubicacionOk=false;
+    boolean todoOk=false;
     EditText colorP;
     Spinner spinner;
     Button elegirImagen;
@@ -53,12 +57,16 @@ public class NewDogRescueActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
     private StorageReference mStorageRef;
     String color, fecha,raza,descriptionText;
+    Coordenadas objeto;
+    Button cojerUbicacion;
+    TextView ubicacionTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_dog_rescue);
         cargarVariables();
+        cargarUbicacion();
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -96,30 +104,33 @@ public class NewDogRescueActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                color=colorP.getText().toString();
-                if (descriptionCheckBox.isChecked()){
-                    descriptionText=description.getText().toString();
+                if(!ubicacionOk){
+                    Toast.makeText(NewDogRescueActivity.this, "No has añadido ubicación", Toast.LENGTH_SHORT).show();
                 }else{
-                    descriptionText="";
-                }
-                uploadImage();
-                String key = mDatabase.child("perro").push().getKey();
-                final String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                final String username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-                final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                String id = mDatabase.child("perro").push().getKey();
-                User u = new User(userID,userEmail,username);
-                Perro p= new Perro(false,true,raza,fecha,color,u,descriptionText,imageUri.getLastPathSegment(),id);
-                Map<String, Object> childUpdates = new HashMap<>();
-                p.setId(key);
-                childUpdates.put("/perro/" + key, p);
-                childUpdates.put("/user-perro/" + u + "/" + key, p);
-                childUpdates.put("/user-perro/" + userID+ "/" + key, p);
-                mDatabase.updateChildren(childUpdates);
-                Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
+                    color=colorP.getText().toString();
+                    if (descriptionCheckBox.isChecked()){
+                        descriptionText=description.getText().toString();
+                    }else{
+                        descriptionText="";
+                    }
+                    uploadImage();
+                    String key = mDatabase.child("perro").push().getKey();
+                    final String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    final String username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                    final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                    String id = mDatabase.child("perro").push().getKey();
+                    User u = new User(userID,userEmail,username);
+                    Perro p= new Perro(false,true,raza,fecha,color,u,descriptionText,imageUri.getLastPathSegment(),id,lat,lon);
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    p.setId(key);
+                    childUpdates.put("/perro/" + key, p);
+                    childUpdates.put("/user-perro/" + userID+ "/" + key, p);
+                    mDatabase.updateChildren(childUpdates);
+                    Toast.makeText(getBaseContext(), "Perro Guardado", Toast.LENGTH_LONG).show();
 
-                Intent i = new Intent(getBaseContext(), DrawerActivity.class);
-                startActivity(i);
+                    Intent i = new Intent(getBaseContext(), DrawerActivity.class);
+                    startActivity(i);
+                }
             }
         });
 
@@ -130,6 +141,29 @@ public class NewDogRescueActivity extends AppCompatActivity {
             }
         });
 
+        cojerUbicacion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(),MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    private void cargarUbicacion() {
+        if (objeto.getActivity().equals("maps")){
+            lat=objeto.getLatitud();
+            lon=objeto.getLongitud();
+            System.out.println("activity new Latitud:"+lat);
+            System.out.println("ativity new Longitud:"+lon);
+        }
+
+        if (lat==0&& lon==0){
+            ubicacionTextView.setText("No has puesto ubicacion");
+        }else{
+            ubicacionTextView.setText("Ubicación correcta");
+        }
 
     }
 
@@ -168,6 +202,9 @@ public class NewDogRescueActivity extends AppCompatActivity {
     }
 
     private void cargarVariables() {
+        ubicacionTextView=(TextView)findViewById(R.id.ubicacionTextViewResque);
+        objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
+        cojerUbicacion=(Button) findViewById(R.id.maps_button_new_dog_resque);
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mDatabase= FirebaseDatabase.getInstance().getReference();
         colorP=(EditText)findViewById(R.id.colorDogRescue);
