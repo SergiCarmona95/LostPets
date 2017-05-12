@@ -27,41 +27,47 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    Coordenadas objeto;
     LocationManager locationManager;
     AlertDialog alert = null;
     Location location;
     FloatingActionButton floatingActionButton;
-
+    boolean marker=false;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
+        if (objeto.getActivity().equals("fragment")){
+            marker=true;
+        }
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         floatingActionButton = (FloatingActionButton)findViewById(R.id.botonVolver);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        /****Mejora****/
-        if ( !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
-            AlertNoGps();
-        }
-        /********/
+        if (!marker) {
+            /****Mejora****/
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                AlertNoGps();
+            }
+            /********/
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-                return;
+                    return;
+                } else {
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
             } else {
                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
-        } else {
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
-
         mapFragment.getMapAsync(this);
 
     }
@@ -80,31 +86,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
-                Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
-                i.putExtra("activity",coordenadas);
-                System.out.println("activity latitud="+mMap.getMyLocation().getLatitude());
-                System.out.println("activity longitud="+mMap.getMyLocation().getLongitude());
-                startActivity(i);
-            }
-        });
+        if (marker){
+            floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(getBaseContext(),DrawerActivity.class);
+                    startActivity(i);
+                }
+            });
+        }else{
+            floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
+                    Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                    i.putExtra("activity",coordenadas);
+                    startActivity(i);
+                }
+            });
+        }
 
         // Add a marker in Sydney and move the camera
-       // LatLng espanya = new LatLng(40.4167754, -3.7037901999999576);
-       // mMap.addMarker(new MarkerOptions().position(espanya).title("Marker in España"));
-       // mMap.moveCamera(CameraUpdateFactory.newLatLng(espanya));
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        } else {
-            // Show rationale and request permission.
+        if (marker){
+            LatLng espanya = new LatLng(objeto.getLatitud(),objeto.getLongitud());
+            mMap.addMarker(new MarkerOptions().position(espanya).title("Marker"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(espanya));
+        }else {
+
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            } else {
+                // Show rationale and request permission.
+            }
+            mMap.setMyLocationEnabled(true);//activar localizador de posicion
         }
-        mMap.setMyLocationEnabled(true);//activar localizador de posicion
-
     }
 
     private void AlertNoGps() {
@@ -128,6 +145,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         final int MY_LOCATION_REQUEST_CODE = 1;
+        if (!marker){
         if (requestCode == MY_LOCATION_REQUEST_CODE) {
             if (permissions.length == 1 &&
                     permissions[0] == android.Manifest.permission.ACCESS_FINE_LOCATION &&
@@ -146,6 +164,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             } else {
                 // Permission was denied. Display an error message.
             }
+        }
         }
 
 

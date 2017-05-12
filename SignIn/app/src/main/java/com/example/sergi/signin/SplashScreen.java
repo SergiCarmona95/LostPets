@@ -62,7 +62,6 @@ public class SplashScreen extends AppCompatActivity {
         },1000);
     }
 
-
     public void descargarImagenes(Perro p){
         final String nomIma=p.getImageUri();
         StorageReference imagRef=mStorageRef.child("Photos/"+nomIma);
@@ -101,7 +100,7 @@ public class SplashScreen extends AppCompatActivity {
                 Perro perro = dataSnapshot.getValue(Perro.class);
                 System.out.println(perro.getNombre());
                 perros.add(perro);
-                descargarImagenes(perro);
+                //descargarImagenes(perro);
             }
 
             @Override

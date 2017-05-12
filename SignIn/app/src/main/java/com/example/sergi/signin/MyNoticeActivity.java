@@ -128,7 +128,7 @@ public class MyNoticeActivity extends AppCompatActivity {
             String ni = perroItem.getImageUri();
             File f = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
             if (!f.exists()){
-                Datos.descargarImagenesPerro(perroItem);
+                //Datos.descargarImagenesPerro(perroItem);
                 customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));
             }else {
                 customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));

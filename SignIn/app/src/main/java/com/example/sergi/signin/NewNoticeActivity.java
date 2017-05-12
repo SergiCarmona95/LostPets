@@ -127,6 +127,8 @@ public class NewNoticeActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(),MapsActivity.class);
+                Coordenadas objeto= new Coordenadas("new",0.0,0.0);
+                intent.putExtra("activity",objeto);
                 startActivity(intent);
             }
         });

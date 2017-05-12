@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,6 +36,10 @@ public class Datos {
 
     interface PerdidosChangeListener {
         void notifyPerdidosChange();
+    }
+
+    interface ImageLoadListener {
+        void onImageLoad(ImageView i,File f);
     }
 
     static Context context;
@@ -76,7 +81,6 @@ public class Datos {
                     }
 
                 }
-
             }
 
             @Override
@@ -137,8 +141,8 @@ public class Datos {
         }
     }
 
-    public static void descargarImagenesPerro(Perro p){
-        String nomIma=p.getImageUri();
+    public static void descargarImagenesPerro(Perro perro, final ImageView imageView, final ImageLoadListener l){
+        String nomIma=perro.getImageUri();
         StorageReference imagRef=mStorageRef.child("Photos/"+nomIma);
         final long ONE_MEGABYTE = 1024 * 1024;
 
@@ -148,7 +152,9 @@ public class Datos {
             imagRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    l.onImageLoad(imageView, localFile);
                     //  Toast.makeText(DrawerActivity.this, "Descargada imagen "+localFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override

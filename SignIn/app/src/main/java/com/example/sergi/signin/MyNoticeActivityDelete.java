@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -103,6 +104,7 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
 
         public MyTodoRecyclerViewAdapter() {
             this.listPerro = new ArrayList<>();
+            
         }
 
         public List<Perro> getList(){
@@ -142,6 +144,8 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
             return true;
         }
 
+
+
         @Override
         public void onItemDismiss(int position) {
             mDatabase=FirebaseDatabase.getInstance().getReference();
@@ -164,6 +168,12 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
 
             public CustomViewHolder(View view) {
                 super(view);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MyNoticeActivityDelete.this, "Has seleccionado un perro", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 this.nombrePerro = (TextView) view.findViewById(R.id.nombreTextViewDogLost);
                 this.fotoPerro = (ImageView) view.findViewById(R.id.fotoPerro);
                 this.razaPerro = (TextView) view.findViewById(R.id.razaTextViewDogLost);
