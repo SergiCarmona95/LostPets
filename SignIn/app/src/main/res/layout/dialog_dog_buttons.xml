@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:text="Ir a maps"
+        android:text="Ver en maps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/boton_mapa"

@@ -1,4 +1,4 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Class;
 
 import java.io.Serializable;
 

@@ -1,12 +1,14 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Class;
 
 import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
 
 /**
  * Created by Sergi on 26/03/2017.
  */
 
-public class User {
+public class User implements Serializable{
     public String id;
     public String username;
     public String email;

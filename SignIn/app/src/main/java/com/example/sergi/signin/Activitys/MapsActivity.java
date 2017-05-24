@@ -1,4 +1,4 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Activitys;
 
 import android.Manifest;
 import android.content.Intent;
@@ -17,22 +17,28 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.sergi.signin.Class.Coordenadas;
+import com.example.sergi.signin.R;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    int marcadores=0;
     Coordenadas objeto;
     LocationManager locationManager;
     AlertDialog alert = null;
     Location location;
     FloatingActionButton floatingActionButton;
     boolean marker=false;
+    int activityCome;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
         if (objeto.getActivity().equals("fragment")){
             marker=true;
+        }else{
+            if (objeto.getActivity().equals("newDogLost")){
+                activityCome=1;
+            }else if (objeto.getActivity().equals("newDogResque")){
+                activityCome=2;
+            }
         }
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -95,34 +107,60 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
         }else{
-            floatingActionButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
-                    Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
-                    i.putExtra("activity",coordenadas);
-                    startActivity(i);
-                }
-            });
+            if (activityCome==1){
+                floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
+                        Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                        i.putExtra("activity",coordenadas);
+                        startActivity(i);
+                    }
+                });
+            }else{
+                floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(getBaseContext(),NewDogRescueActivity.class);
+                        Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                        i.putExtra("activity",coordenadas);
+                        startActivity(i);
+                    }
+                });
+            }
         }
 
         // Add a marker in Sydney and move the camera
 
         if (marker){
             LatLng espanya = new LatLng(objeto.getLatitud(),objeto.getLongitud());
-            mMap.addMarker(new MarkerOptions().position(espanya).title("Marker"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(espanya));
+            mMap.addMarker(new MarkerOptions().position(espanya).title("Perro"));
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(espanya, 16);
+            mMap.animateCamera(cameraUpdate);
         }else {
+            Toast.makeText(MapsActivity.this, "DENTRO", Toast.LENGTH_SHORT).show();
+            if (marcadores==0){
+                mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener(){
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        Toast.makeText(MapsActivity.this, "CLICK", Toast.LENGTH_SHORT).show();
+                        mMap.addMarker(new MarkerOptions()
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.logo_minium))
+                                .anchor(0.0f,1.0f)
+                                .position(latLng));
+                        marcadores=1;
 
+                    }
+                });
+            }
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
-            } else {
-                // Show rationale and request permission.
             }
             mMap.setMyLocationEnabled(true);//activar localizador de posicion
         }
     }
+
 
     private void AlertNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);

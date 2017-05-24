@@ -1,15 +1,16 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Activitys;
 
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,13 +19,24 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.sergi.signin.Class.Coordenadas;
+import com.example.sergi.signin.Class.Datos;
+import com.example.sergi.signin.Fragments.FragmentListViewDogLost;
+import com.example.sergi.signin.Fragments.FragmentListViewDogResque;
+import com.example.sergi.signin.Google.GoogleApiActivity;
+import com.example.sergi.signin.R;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.storage.StorageReference;
 
 
 public class DrawerActivity extends GoogleApiActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -32,6 +44,10 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private static int numTab;
     public static Datos datos;
+    String raza,nombre,color,chip;
+    Spinner spinner;
+    LayoutInflater inflater;
+    ArrayAdapter<CharSequence> adapter;
     boolean cargarDatos=false;
 
     @Override
@@ -39,6 +55,8 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
         cargarVariables();
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         datos.crearCarpeta();
         datos.cargarPerrosEncontrados();
         datos.cargarPerrosPerdidos();
@@ -58,8 +76,55 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(DrawerActivity.this);
+                View mView=inflater.inflate(R.layout.dialog_filter_dog,null);
+                final TextView nombreTextView=(TextView)mView.findViewById(R.id.nombreFiltrar);
+                final TextView colorTextView=(TextView)mView.findViewById(R.id.colorFiltrar);
+                final RadioButton chipSi=(RadioButton) mView.findViewById(R.id.filtrarChipSi);
+                final RadioButton chipNo=(RadioButton) mView.findViewById(R.id.filtrarChipNo);
+                spinner=(Spinner)mView.findViewById(R.id.spinnerFiltrar);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        raza=adapter.getItem(position).toString();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                Button botonFiltrar=(Button) mView.findViewById(R.id.botonFiltrar);
+                botonFiltrar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        boolean ok = false;
+                        if (chipSi.isChecked()) {
+                            chip = "yes";
+                            ok = true;
+                        } else if (chipNo.isChecked()) {
+                            chip = "no";
+                            ok = true;
+                        }
+                        color = colorTextView.getText().toString();
+                        nombre = nombreTextView.getText().toString();
+                        if (ok == true) {
+                            Intent i = new Intent(DrawerActivity.this, FiltrarActivity.class);
+                            i.putExtra("nombre", nombre);
+                            i.putExtra("chip", chip);
+                            i.putExtra("raza", raza);
+                            i.putExtra("color", color);
+                            startActivity(i);
+                        }else{
+                            Toast.makeText(DrawerActivity.this, "Has de elegir si tiene chip o no", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                spinner.setAdapter(adapter);
+                mBuilder.setView(mView);
+                AlertDialog dialog=mBuilder.create();
+                dialog.show();
             }
         });
 
@@ -113,6 +178,8 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
 
 
     public void cargarVariables(){
+        adapter = ArrayAdapter.createFromResource(this, R.array.razas, android.R.layout.simple_spinner_item);
+        inflater = this.getLayoutInflater();
         datos= new Datos(getBaseContext());
     }
 

@@ -1,11 +1,10 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Class;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.support.annotation.NonNull;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -22,7 +21,6 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Sergi on 02/05/2017.
@@ -30,33 +28,37 @@ import java.util.List;
 
 public class Datos {
 
-    interface EncontradosChangeListener {
+    public interface EncontradosChangeListener {
         void notifyEncontradosChange();
     }
 
-    interface PerdidosChangeListener {
+    public interface PerdidosChangeListener {
         void notifyPerdidosChange();
     }
 
-    interface ImageLoadListener {
+    public interface ImageLoadListener {
         void onImageLoad(ImageView i,File f);
+    }
+
+    public interface ImageThumbLoadListener {
+        void onImageThumbLoad(ImageView i,File f);
     }
 
     static Context context;
     DatabaseReference mDatabase;
-    static ArrayList<Perro> listperrosPerdidos;
-    static ArrayList<Perro> listperrosEncontrados;
+    public static ArrayList<Perro> listperrosPerdidos;
+    public static ArrayList<Perro> listperrosEncontrados;
     static File dirImagenes;
     static private StorageReference mStorageRef;
     static EncontradosChangeListener encontradosChangeListener;
     static PerdidosChangeListener perdidosChangeListener;
     static int contador=0;
 
-    static void setEncontradosChangeListener(EncontradosChangeListener listener){
+    public static void setEncontradosChangeListener(EncontradosChangeListener listener){
         encontradosChangeListener = listener;
     }
 
-    static void setPerdidosChangeListener(PerdidosChangeListener listener){
+    public static void setPerdidosChangeListener(PerdidosChangeListener listener){
         perdidosChangeListener = listener;
     }
 
@@ -153,6 +155,30 @@ public class Datos {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                     l.onImageLoad(imageView, localFile);
+                    //  Toast.makeText(DrawerActivity.this, "Descargada imagen "+localFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+
+                }
+            });
+        }
+    }
+
+    public static void descargarImagenesThumbPerro(Perro perro, final ImageView imageView, final ImageThumbLoadListener l){
+        String nomIma=perro.getImageUri();
+        StorageReference imagRef=mStorageRef.child("PhotosTumb/"+nomIma);
+        final long ONE_MEGABYTE = 1024 * 1024;
+
+        final File localFile = new  File(dirImagenes.getAbsolutePath() + "/" + nomIma + "Thumb.jpg");
+        System.out.println(localFile.toString());
+        if (!localFile.exists()){
+            imagRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    l.onImageThumbLoad(imageView, localFile);
                     //  Toast.makeText(DrawerActivity.this, "Descargada imagen "+localFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
                 }

@@ -1,10 +1,13 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Activitys;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +23,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sergi.signin.Class.Coordenadas;
+import com.example.sergi.signin.Class.Perro;
+import com.example.sergi.signin.Class.User;
+import com.example.sergi.signin.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,8 +37,8 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.w3c.dom.Text;
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,6 +121,7 @@ public class NewDogRescueActivity extends AppCompatActivity {
                         descriptionText="";
                     }
                     uploadImage();
+                    uploadImageThumb();
                     String key = mDatabase.child("perro").push().getKey();
                     final String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     final String username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
@@ -145,7 +153,7 @@ public class NewDogRescueActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(),MapsActivity.class);
-                Coordenadas objeto= new Coordenadas("new",0.0,0.0);
+                Coordenadas objeto= new Coordenadas("newDogResque",0.0,0.0);
                 intent.putExtra("activity",objeto);
                 startActivity(intent);
             }
@@ -165,6 +173,7 @@ public class NewDogRescueActivity extends AppCompatActivity {
             ubicacionTextView.setText("No has puesto ubicacion");
         }else{
             ubicacionTextView.setText("Ubicación correcta");
+            ubicacionOk=true;
         }
 
     }
@@ -195,6 +204,54 @@ public class NewDogRescueActivity extends AppCompatActivity {
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress=(100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
                             progressDialog.setMessage(((int)  progress) +"% Uploaded...");
+                        }
+                    });
+            ;
+        }else{
+            Toast.makeText(this, "No has puesto ninguna Foto", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void uploadImageThumb(){
+        if (imageUri!=null){
+            System.out.println("entra");
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading...");
+            progressDialog.show();
+            StorageReference imageRef= mStorageRef.child("PhotosTumb").child(imageUri.getLastPathSegment());
+            System.out.println("perro "+imageUri.toString());
+            Bitmap b = null;
+            try {
+                b = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("perro "+b.toString());
+            Bitmap thumbImage = ThumbnailUtils.extractThumbnail(b, 150, 150);
+            System.out.println("perro "+thumbImage.toString());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            thumbImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            imageRef.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    progressDialog.dismiss();
+                    Toast.makeText(NewDogRescueActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
+
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(NewDogRescueActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress=(100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                            progressDialog.setMessage((int)  progress +"% Uploaded...");
                         }
                     });
             ;

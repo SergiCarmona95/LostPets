@@ -1,7 +1,6 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Splash;
 
 import android.content.Intent;
-import android.graphics.Movie;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -9,9 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.felipecsl.gifimageview.library.GifImageView;
+import com.example.sergi.signin.Activitys.SignInActivity;
+import com.example.sergi.signin.Class.Perro;
+import com.example.sergi.signin.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
@@ -23,11 +23,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class SplashScreen extends AppCompatActivity {

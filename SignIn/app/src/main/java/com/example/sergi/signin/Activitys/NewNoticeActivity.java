@@ -1,10 +1,13 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Activitys;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +24,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sergi.signin.Class.Coordenadas;
+import com.example.sergi.signin.Class.Perro;
+import com.example.sergi.signin.Class.User;
+import com.example.sergi.signin.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,18 +35,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Calendar;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class NewNoticeActivity extends AppCompatActivity{
@@ -51,6 +53,7 @@ public class NewNoticeActivity extends AppCompatActivity{
     Button save;
     Button elegirFecha;
     Button cojerUbicacion;
+    EditText editTextDescription;
     EditText nomEditText;
     EditText recompensaEditText;
     EditText colorEditText;
@@ -60,6 +63,7 @@ public class NewNoticeActivity extends AppCompatActivity{
     CheckBox recompensaCheck;
     RadioButton chipSi;
     RadioButton chipNo;
+    RadioButton radioButtonDescription;
     RadioButton cogerSi;
     RadioButton cogerNo;
     Spinner razas;
@@ -69,7 +73,7 @@ public class NewNoticeActivity extends AppCompatActivity{
     boolean ubicacionOk=false;
     public Uri imageUri;
     public String uriImage;
-    String nombre,colorPerro,chip,coger,raza;
+    String nombre,colorPerro,chip,coger,raza,descripcion;
     int recompensa;
     final int RC_IMAGE_PICK=1;
     static final int DATE_DIALOG_ID = 999;
@@ -111,6 +115,13 @@ public class NewNoticeActivity extends AppCompatActivity{
             }
         });
 
+        radioButtonDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editTextDescription.setVisibility(View.VISIBLE);
+            }
+        });
+
 
         otherR.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +138,7 @@ public class NewNoticeActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(),MapsActivity.class);
-                Coordenadas objeto= new Coordenadas("new",0.0,0.0);
+                Coordenadas objeto= new Coordenadas("newDogLost",0.0,0.0);
                 intent.putExtra("activity",objeto);
                 startActivity(intent);
             }
@@ -157,6 +168,7 @@ public class NewNoticeActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 nombre=nomEditText.getText().toString();
+                descripcion=editTextDescription.getTransitionName().toString();
                 colorPerro=colorEditText.getText().toString();
                 if (chipSi.isChecked()){
                    chip="yes";
@@ -234,8 +246,9 @@ public class NewNoticeActivity extends AppCompatActivity{
         System.out.println("a"+key);
 
         uploadImage();
+        uploadImageThumb();
         User u = new User(userId,userEmail,username);
-        Perro p =new Perro(nombre,imageUri.getLastPathSegment(),key,colorPerro,coger,chip,recompensa,raza,false,true,u,day,lat,lon);
+        Perro p =new Perro(nombre,imageUri.getLastPathSegment(),key,colorPerro,coger,chip,recompensa,raza,false,true,u,day,lat,lon,descripcion);
         System.out.println("perro:"+p.toString());
         if (todoOk==true) {
             System.out.println("perro:correcto");
@@ -285,7 +298,57 @@ public class NewNoticeActivity extends AppCompatActivity{
         }
     }
 
+    public void uploadImageThumb(){
+        if (imageUri!=null){
+            System.out.println("entra");
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading...");
+            progressDialog.show();
+            StorageReference imageRef= mStorageRef.child("PhotosTumb").child(imageUri.getLastPathSegment());
+            System.out.println("perro "+imageUri.toString());
+            Bitmap b = null;
+            try {
+                b = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("perro "+b.toString());
+            Bitmap thumbImage = ThumbnailUtils.extractThumbnail(b, 150, 150);
+            System.out.println("perro "+thumbImage.toString());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            thumbImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            imageRef.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    progressDialog.dismiss();
+                    Toast.makeText(NewNoticeActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
+
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(NewNoticeActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress=(100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                            progressDialog.setMessage((int)  progress +"% Uploaded...");
+                        }
+                    });
+            ;
+        }else{
+            Toast.makeText(this, "No has puesto ninguna Foto", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void cargarVariables() {
+        editTextDescription=(EditText)findViewById(R.id.descriptionEditTextDogLost);
+        radioButtonDescription=(RadioButton)findViewById(R.id.descriptionDogLost);
         ubicacionTextView=(TextView)findViewById(R.id.ubicacionTextView);
         objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
         cojerUbicacion=(Button) findViewById(R.id.maps_button_new_dog);

@@ -1,12 +1,14 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Class;
 
 import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
 
 /**
  * Created by Sergi on 21/03/2017.
  */
 
-public class Perro {
+public class Perro implements Serializable{
     String nombre;
     boolean perdido;
     boolean encontrado;
@@ -73,7 +75,7 @@ public class Perro {
 
     public Perro(String nombre, String imageUri, String id,
                  String color, String coger, String chip, int recompensa, String raza,
-                 boolean encontrado, boolean perdido,User u, String fecha,double lat,double lon) {
+                 boolean encontrado, boolean perdido,User u, String fecha,double lat,double lon,String descripcion) {
         this.fecha= fecha;
         this.nombre = nombre;
         this.imageUri = imageUri;
@@ -88,6 +90,7 @@ public class Perro {
         this.u=u;
         this.lon=lon;
         this.lat=lat;
+        this.descripcion=descripcion;
     }
 
     @Exclude

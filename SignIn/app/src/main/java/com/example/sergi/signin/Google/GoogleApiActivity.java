@@ -1,4 +1,4 @@
-package com.example.sergi.signin;
+package com.example.sergi.signin.Google;
 
 /**
  * Created by Sergi on 02/02/2017.
@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.example.sergi.signin.R;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;

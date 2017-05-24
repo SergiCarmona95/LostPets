@@ -225,14 +225,7 @@
                                 android:textSize="25dp"
                                 android:textColor="@color/colorPrimary"
                                 android:layout_width="match_parent"
-                                android:layout_height="268dp"
-                                android:text="dsfsdfsdfsdfsdfsdfds
-                            fsadfsdfdsfsdfdsfsadfdsf
-                            sdfsdfsdfsdfsdf
-                            sdafsdfdsafsadfwefeq
-                            wrwq
-                            ew
-                            rwe" />
+                                android:layout_height="268dp"/>
                         </LinearLayout>
 
                     </LinearLayout>
