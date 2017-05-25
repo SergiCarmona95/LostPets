@@ -14,13 +14,9 @@
             android:id="@+id/MyNotices"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Mis Avisos" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
     </group>
 
-    <item android:title="Communicate">
+    <!--<item android:title="Communicate">
         <menu>
             <item
                 android:id="@+id/nav_share"
@@ -31,7 +27,7 @@
                 android:icon="@drawable/ic_menu_send"
                 android:title="Send" />
         </menu>
-    </item>
+    </item>-->
 
     <item android:title="">
         <menu>

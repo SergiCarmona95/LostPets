@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sergi.signin.Activitys.InformationDogLost;
+import com.example.sergi.signin.Activitys.InformationDogResque;
 import com.example.sergi.signin.Class.Coordenadas;
 import com.example.sergi.signin.Class.Datos;
 import com.example.sergi.signin.Class.Perro;
@@ -80,6 +82,7 @@ public class FragmentListViewDogResque extends Fragment {
         @Override
         public void onBindViewHolder(MyTodoRecyclerViewAdapter.CustomViewHolder customViewHolder, int i) {
             Perro perroItem = listPerro.get(i);
+            customViewHolder.perro=perroItem;
             customViewHolder.razaPerro.setText(perroItem.getRaza());
             customViewHolder.lat=perroItem.getLat();
             customViewHolder.lon=perroItem.getLon();
@@ -115,6 +118,7 @@ public class FragmentListViewDogResque extends Fragment {
             protected ImageView fotoPerro;
             protected TextView razaPerro;
             protected TextView fechaPerro;
+            protected Perro perro;
             protected double lat;
             protected double lon;
 
@@ -144,9 +148,10 @@ public class FragmentListViewDogResque extends Fragment {
                         buttonDog.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Toast.makeText(getContext(), "Boton perros", Toast.LENGTH_SHORT).show();
-                                System.out.println("lat:"+lat);
-                                System.out.println("lat-lon:"+lon);
+                                Intent i = new Intent(getContext(),InformationDogResque.class);
+                                Perro dog = perro;
+                                i.putExtra("dog",dog);
+                                startActivity(i);
                             }
                         });
 

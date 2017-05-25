@@ -2,4 +2,6 @@
 <resources>
     <string name="webID">587705346200-tckpjcheku8pc271dauiqun5ah7ott7d.apps.googleusercontent.com</string>
     <string name="facebookId">1555695011115031</string>
+    <string name="email">lostPetsApp@gmail.com</string>
+    <string name="passwordEmail">LostPetsSergioSergi</string>
 </resources>

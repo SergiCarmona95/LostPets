@@ -168,7 +168,7 @@ public class NewNoticeActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 nombre=nomEditText.getText().toString();
-                descripcion=editTextDescription.getTransitionName().toString();
+                descripcion=editTextDescription.getText().toString();
                 colorPerro=colorEditText.getText().toString();
                 if (chipSi.isChecked()){
                    chip="yes";
@@ -231,7 +231,9 @@ public class NewNoticeActivity extends AppCompatActivity{
             Toast.makeText(this, "No has elegido si tiene chip o no", Toast.LENGTH_SHORT).show();
         }else if(!ubicacionOk){
             Toast.makeText(this, "No has añadido ubicacion", Toast.LENGTH_SHORT).show();
-        }else{
+        }else if(raza.equals("Selecciona Raza Aquí")){
+            Toast.makeText(this, "No has seleccionado raza", Toast.LENGTH_SHORT).show();
+        } else{
             todoOk=true;
         }
     }

@@ -1,6 +1,7 @@
 package com.example.sergi.signin.Activitys;
 
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,8 +36,9 @@ public class MyNoticeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_notice);
-        cargarDatos();
-        cargarPerrosFirebaseInList();
+        cargarVariables();
+        String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        //cargarPerrosFirebaseInList();
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,9 +53,25 @@ public class MyNoticeActivity extends AppCompatActivity {
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         //  listView.setAdapter(myTodoRecyclerViewAdapter);
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
+        for (Perro perro:Datos.listperrosEncontrados) {
+            if (perro.getUser().getEmail().equals(userEmail)){
+                if (perro.isEncontrado()){perro.setNombre("Perro Perdido");}
+                listPerro.add(perro);
+                myTodoRecyclerViewAdapter.getList().add(perro);
+                myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
+            }
+        }
+        for (Perro perro:Datos.listperrosPerdidos) {
+            if (perro.getUser().getEmail().equals(userEmail)){
+                if (perro.isEncontrado()){perro.setNombre("Perro Perdido");}
+                listPerro.add(perro);
+                myTodoRecyclerViewAdapter.getList().add(perro);
+                myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
+            }
+        }
     }
 
-    private void cargarDatos() {
+    private void cargarVariables() {
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         mDatabase= FirebaseDatabase.getInstance().getReference();
         listPerro=new ArrayList<>();
@@ -61,7 +79,7 @@ public class MyNoticeActivity extends AppCompatActivity {
         //listView=(ListView)findViewById(R.id.listViewMyNotice);
     }
 
-    public void cargarPerrosFirebaseInList(){
+  /*  public void cargarPerrosFirebaseInList(){
         mDatabase=FirebaseDatabase.getInstance().getReference();
         final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
@@ -96,9 +114,12 @@ public class MyNoticeActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-    }
+    }*/
 
-    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>{
+    class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>
+        implements Datos.PerdidosChangeListener,
+            Datos.EncontradosChangeListener,
+            Datos.ImageThumbLoadListener{
 
         private List<Perro> listPerro;
 
@@ -136,6 +157,21 @@ public class MyNoticeActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return (null != listPerro ? listPerro.size() : 0);
+        }
+
+        @Override
+        public void notifyPerdidosChange() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void notifyEncontradosChange() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onImageThumbLoad(ImageView i, File f) {
+            i.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
         }
 
 

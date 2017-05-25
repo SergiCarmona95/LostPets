@@ -1,5 +1,8 @@
 package com.example.sergi.signin.Activitys;
 
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,13 +33,15 @@ import java.util.List;
 public class MyNoticeActivityDelete extends AppCompatActivity {
     DatabaseReference mDatabase;
     private List<Perro> listPerro;
+    FloatingActionButton floatingActionButton;
     MyTodoRecyclerViewAdapter myTodoRecyclerViewAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_notice);
-        cargarDatos();
-        cargarPerrosFirebaseInList();
+        setContentView(R.layout.activity_my_notice_delete);
+        cargarVariables();
+       // cargarPerrosFirebaseInList();
+        String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.listViewMyNotice);
 
@@ -44,6 +49,30 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
         //  adapter=new ArrayAdapter<Perro>(view.getContext(),R.layout.layout_dog_lost,listPerro);
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         //  listView.setAdapter(myTodoRecyclerViewAdapter);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(),DrawerActivity.class);
+                startActivity(i);
+            }
+        });
+        for (Perro perro:Datos.listperrosEncontrados) {
+            if (perro.getUser().getEmail().equals(userEmail)){
+                if (perro.isEncontrado()){perro.setNombre("Perro Perdido");}
+                listPerro.add(perro);
+                myTodoRecyclerViewAdapter.getList().add(perro);
+                myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
+            }
+        }
+        for (Perro perro:Datos.listperrosPerdidos) {
+            if (perro.getUser().getEmail().equals(userEmail)){
+                if (perro.isEncontrado()){perro.setNombre("Perro Perdido");}
+                listPerro.add(perro);
+                myTodoRecyclerViewAdapter.getList().add(perro);
+                myTodoRecyclerViewAdapter.notifyItemInserted(myTodoRecyclerViewAdapter.getItemCount());
+            }
+        }
+
         mRecyclerView.setAdapter(myTodoRecyclerViewAdapter);
 
         ItemTouchHelper.Callback callback =
@@ -52,13 +81,14 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
         touchHelper.attachToRecyclerView(mRecyclerView);
     }
 
-    private void cargarDatos() {
+    private void cargarVariables() {
         myTodoRecyclerViewAdapter = new MyTodoRecyclerViewAdapter();
         mDatabase= FirebaseDatabase.getInstance().getReference();
         listPerro=new ArrayList<>();
+        floatingActionButton = (FloatingActionButton)findViewById(R.id.botonVolver);
     }
 
-    public void cargarPerrosFirebaseInList(){
+    /*public void cargarPerrosFirebaseInList(){
         mDatabase=FirebaseDatabase.getInstance().getReference();
         final String userEmail =FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseDatabase.getInstance().getReference("perro").addChildEventListener(new ChildEventListener() {
@@ -93,16 +123,22 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-    }
+    }*/
 
     class MyTodoRecyclerViewAdapter extends RecyclerView.Adapter<MyTodoRecyclerViewAdapter.CustomViewHolder>
-            implements ItemTouchHelperAdapter{
+            implements Datos.PerdidosChangeListener,
+            Datos.EncontradosChangeListener,
+            ItemTouchHelperAdapter,
+            Datos.ImageThumbLoadListener{
 
         private List<Perro> listPerro;
 
+        public List<Perro> getListPerro() {
+            return listPerro;
+        }
+
         public MyTodoRecyclerViewAdapter() {
             this.listPerro = new ArrayList<>();
-            
         }
 
         public List<Perro> getList(){
@@ -123,7 +159,12 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
             customViewHolder.razaPerro.setText(perroItem.getRaza());
             String ni = perroItem.getImageUri();
             File f = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+"Thumb.jpg");
-            customViewHolder.fotoPerro.setImageBitmap(Datos.cambiarTamañoFoto(f));
+            if (f.exists()){
+                customViewHolder.fotoPerro.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
+            }else{
+                Datos.descargarImagenesThumbPerro(perroItem, customViewHolder.fotoPerro, this);
+
+            }
             customViewHolder.fechaPerro.setText(perroItem.getFecha());
         }
 
@@ -150,7 +191,23 @@ public class MyNoticeActivityDelete extends AppCompatActivity {
             System.out.println(key);
             mDatabase.child("perro").child(key).removeValue();
             listPerro.remove(position);
+            Toast.makeText(MyNoticeActivityDelete.this, "Perro Eliminado", Toast.LENGTH_SHORT).show();
             notifyItemRemoved(position);
+        }
+
+        @Override
+        public void notifyPerdidosChange() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void notifyEncontradosChange() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onImageThumbLoad(ImageView i, File f) {
+            i.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder {

@@ -15,7 +15,6 @@ import android.support.v4.content.ContextCompat;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.sergi.signin.Class.Coordenadas;
 import com.example.sergi.signin.R;
@@ -31,6 +30,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    double lat,lon;
+    LatLng posicionMarcador=null;
     int marcadores=0;
     Coordenadas objeto;
     LocationManager locationManager;
@@ -44,6 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        posicionMarcador= new LatLng(0.0,0.0);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         objeto = (Coordenadas)getIntent().getExtras().getSerializable("activity");
         if (objeto.getActivity().equals("fragment")){
@@ -107,28 +109,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
         }else{
-            if (activityCome==1){
-                floatingActionButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
-                        Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
-                        i.putExtra("activity",coordenadas);
-                        startActivity(i);
-                    }
-                });
-            }else{
-                floatingActionButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent i = new Intent(getBaseContext(),NewDogRescueActivity.class);
-                        Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
-                        i.putExtra("activity",coordenadas);
-                        startActivity(i);
-                    }
-                });
+               if (activityCome==1){
+                    floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (marcadores==1) {
+                                Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
+                                Coordenadas coordenadas= new Coordenadas("maps",lat,lon);
+                                i.putExtra("activity",coordenadas);
+                                startActivity(i);
+
+                            }else {
+                                Intent i = new Intent(getBaseContext(),NewNoticeActivity.class);
+                                Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                                i.putExtra("activity",coordenadas);
+                                startActivity(i);
+                            }
+                        }
+                    });
+                }else{
+                    floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (marcadores==1) {
+                                Intent i = new Intent(getBaseContext(),NewDogRescueActivity.class);
+                                Coordenadas coordenadas= new Coordenadas("maps",lat,lon);
+                                i.putExtra("activity",coordenadas);
+                                startActivity(i);
+
+                            }else {
+                                Intent i = new Intent(getBaseContext(),NewDogRescueActivity.class);
+                                Coordenadas coordenadas= new Coordenadas("maps",mMap.getMyLocation().getLatitude(),mMap.getMyLocation().getLongitude());
+                                i.putExtra("activity",coordenadas);
+                                startActivity(i);
+                            }
+
+                        }
+                    });
+                }
             }
-        }
 
         // Add a marker in Sydney and move the camera
 
@@ -138,18 +157,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(espanya, 16);
             mMap.animateCamera(cameraUpdate);
         }else {
-            Toast.makeText(MapsActivity.this, "DENTRO", Toast.LENGTH_SHORT).show();
             if (marcadores==0){
                 mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener(){
                     @Override
                     public void onMapLongClick(LatLng latLng) {
-                        Toast.makeText(MapsActivity.this, "CLICK", Toast.LENGTH_SHORT).show();
+                        posicionMarcador=latLng;
                         mMap.addMarker(new MarkerOptions()
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.logo_minium))
                                 .anchor(0.0f,1.0f)
                                 .position(latLng));
                         marcadores=1;
-
+                        lat=latLng.latitude;
+                        lon=latLng.longitude;
                     }
                 });
             }

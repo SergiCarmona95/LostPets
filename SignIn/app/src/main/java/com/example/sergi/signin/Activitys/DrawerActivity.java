@@ -128,6 +128,8 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
             }
         });
 
+
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -202,12 +204,6 @@ public class DrawerActivity extends GoogleApiActivity implements NavigationView.
         } else if (id == R.id.MyNotices) {
             Intent i = new Intent(this,MyNoticeActivity.class);
             startActivity(i);
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         } else if (id == R.id.nav_sign_out) {
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
                 @Override

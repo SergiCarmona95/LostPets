@@ -113,6 +113,8 @@ public class NewDogRescueActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(!ubicacionOk){
                     Toast.makeText(NewDogRescueActivity.this, "No has añadido ubicación", Toast.LENGTH_SHORT).show();
+                }else if(raza.equals("Selecciona Raza Aquí")){
+                    Toast.makeText(NewDogRescueActivity.this, "No has seleccionado raza", Toast.LENGTH_SHORT).show();
                 }else{
                     color=colorP.getText().toString();
                     if (descriptionCheckBox.isChecked()){

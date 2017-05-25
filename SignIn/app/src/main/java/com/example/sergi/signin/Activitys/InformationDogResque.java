@@ -15,76 +15,63 @@ import com.example.sergi.signin.R;
 
 import java.io.File;
 
-public class InformationDogLost extends AppCompatActivity
+public class InformationDogResque extends AppCompatActivity
         implements Datos.ImageLoadListener{
 
-    Perro p;
-    ImageButton gmail;
-    ImageView imageViewFoto;
-    TextView textViewNombre;
     TextView textViewRaza;
     TextView textViewColor;
-    TextView textViewChip;
     TextView textViewFecha;
-    TextView textViewRecompensa;
-    TextView textViewMiedo;
     TextView textViewDescripcion;
-
-
+    ImageButton gmail;
+    ImageView imageView;
+    Perro p;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_information_dog_lost);
+        setContentView(R.layout.activity_information_dog_resque);
         cargarVariables();
         cargarDatosEnLayout();
+
         gmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getBaseContext(),SendMailActivity.class);
                 i.putExtra("emailUsuario",p.getUser().getEmail());
-                i.putExtra("nombrePerro",p.getNombre());
-                i.putExtra("activity","informationDogLost");
+                i.putExtra("raza",p.getRaza());
+                i.putExtra("activity","informationDogResque");
                 startActivity(i);
             }
         });
-    }
+}
 
     private void cargarDatosEnLayout() {
         String ni = p.getImageUri();
         File f = new File(getBaseContext().getFilesDir().getAbsolutePath()+"/imagenes/"+ni+".jpg");
         if (f.exists()){
-            imageViewFoto.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
+            imageView.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
         }else{
-            Datos.descargarImagenesPerro(p, imageViewFoto, this);
+            Datos.descargarImagenesPerro(p, imageView, this);
         }
-        textViewNombre.setText(p.getNombre());
         textViewRaza.setText(p.getRaza());
         textViewColor.setText(p.getColor());
-        textViewChip.setText(p.getChip());
         textViewFecha.setText(p.getFecha());
-        textViewRecompensa.setText(String.valueOf(p.getRecompensa())+"€");
-        textViewMiedo.setText(p.getCoger());
         textViewDescripcion.setText(p.getDescripcion());
-
     }
 
     private void cargarVariables() {
-        gmail=(ImageButton)findViewById(R.id.botonGmail);
         p = (Perro)getIntent().getExtras().getSerializable("dog");
-        imageViewFoto=(ImageView)findViewById(R.id.fotoPerroInformacion);
-        textViewNombre=(TextView)findViewById(R.id.nombrePerroInformacion);
-        textViewRaza=(TextView)findViewById(R.id.razaPerroInformacion);
-        textViewColor=(TextView)findViewById(R.id.colorPerroInformacion);
-        textViewChip=(TextView)findViewById(R.id.chipPerroInformacion);
-        textViewFecha=(TextView)findViewById(R.id.fechaPerroInformacion);
-        textViewRecompensa=(TextView)findViewById(R.id.recompensaPerroInformacion);
-        textViewMiedo=(TextView)findViewById(R.id.miedoPerroInformacion);
-        textViewDescripcion=(TextView)findViewById(R.id.descriptionInformationDog);
+        textViewRaza=(TextView)findViewById(R.id.razaPerroInformacionResque);
+        textViewColor=(TextView)findViewById(R.id.colorPerroInformacionResque);
+        textViewFecha=(TextView)findViewById(R.id.fechaPerroInformacionResque);
+        textViewDescripcion=(TextView)findViewById(R.id.descriptionInformationDogResque);
+        gmail=(ImageButton)findViewById(R.id.botonGmailResque);
+        imageView=(ImageView)findViewById(R.id.fotoPerroInformacionResque);
+
     }
 
     @Override
     public void onImageLoad(ImageView i, File f) {
-        imageViewFoto.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
+        imageView.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
     }
 }
